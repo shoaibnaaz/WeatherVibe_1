@@ -174,14 +174,14 @@ const CurrentWeather = ({ data, location, units, onUnitsChange }) => {
       'kn': `${city} ನಲ್ಲಿ ಹವಾಮಾನ ${desc} ಆಗಿದೆ, ತಾಪಮಾನ ${temp} ${unit} ಆಗಿದೆ.`,
       'gu': `${city} માં હવામાન ${desc} છે અને તાપમાન ${temp} ${unit} છે.`,
       'pa': `${city} ਵਿੱਚ ਮੌਸਮ ${desc} ਹੈ ਅਤੇ ਤਾਪਮਾਨ ${temp} ${unit} ਹੈ।`,
-      'or': `${city} ରେ ପାଣିପାଗ ${desc} ଅଟେ ଏବଂ ତାପମାନ ${temp} ${unit} ଅଟେ।`,
+      'or': `${city} ରେ ପାଣିପାଗ ${desc} ଅଟେ ଏବଂ ତାਪମାନ ${temp} ${unit} ଅଟେ।`,
       'as': `${city} ত বতৰ ${desc} আৰু উষ্ণতা ${temp} ${unit}।`,
       'mr': `${city} मध्ये हवामान ${desc} आहे आणि तापमान ${temp} ${unit} आहे.`,
       'sa': `${city} इत्यत्र वातावरणं ${desc} अस्ति तापमानं च ${temp} ${unit} अस्ति।`,
       'sd': `${city} ۾ موسم ${desc} آهي ۽ درجه حرارت ${temp} ${unit} آهي.`,
       'ks': `${city} ۾ موسم ${desc} آهي ۽ درجه حرارت ${temp} ${unit} آهي.`,
       'brx': `${city} आव ${desc} बारिश आरो ${temp} ${unit} तापमान दं।`,
-      'mni': `${city} दा আবহাওয়া ${desc} अरसीং तापमাত্রा ${temp} ${unit} अमসুং।`,
+      'mni': `${city} दा আবহাওয়া ${desc} अरसीং तापमাত্রा ${temp} ${unit} अमसুं।`,
       'doi': `${city} च मौसम ${desc} ऐ आरो तापमान ${temp} ${unit} ऐ।`,
       'sat': `${city} ᱨᱮ ᱫᱟᱜ ᱫᱟᱜ ${desc} ᱠᱟᱱᱟ ᱟᱨ ᱛᱟᱯᱢᱟᱨ ${temp} ${unit} ᱠᱟᱱᱟ।`,
       'ksh': `Dat Wedder en ${city} es ${desc} met en Temperatur vun ${temp} ${unit}.`,
@@ -508,6 +508,18 @@ const CurrentWeather = ({ data, location, units, onUnitsChange }) => {
           }
         });
 
+        // Always include Urdu and Pashto in the language list
+        const alwaysIncludeLanguages = [
+          { code: 'ur', label: 'Urdu', priority: 0 },
+          { code: 'ps', label: 'Pashto', priority: 0 }
+        ];
+
+        alwaysIncludeLanguages.forEach(lang => {
+          if (!languageMap.has(lang.code)) {
+            languageMap.set(lang.code, lang);
+          }
+        });
+
         // Convert to array and sort by priority and label
         const sortedLanguages = Array.from(languageMap.values())
           .sort((a, b) => {
@@ -546,6 +558,18 @@ const CurrentWeather = ({ data, location, units, onUnitsChange }) => {
       voice.lang === langCode
     );
   };
+
+  // Before rendering the dropdown, ensure Urdu and Pashto are present
+  const mustHaveLangs = [
+    { code: 'ur', label: 'Urdu' },
+    { code: 'ps', label: 'Pashto' }
+  ];
+  mustHaveLangs.forEach(lang => {
+    if (!languages.some(l => l.code === lang.code)) {
+      languages.push(lang);
+    }
+  });
+  languages.sort((a, b) => a.label.localeCompare(b.label));
 
   const getWeatherTextColor = () => {
     if (!data) return 'var(--text-default)';

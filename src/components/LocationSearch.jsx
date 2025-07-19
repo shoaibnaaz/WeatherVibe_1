@@ -18,6 +18,12 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
     try {
       // Using OpenWeatherMap Geocoding API
       const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
+      
+      // Check if API key is available
+      if (!API_KEY) {
+        throw new Error('API key is missing. Please check your environment variables.')
+      }
+      
       const response = await axios.get(
         `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(searchTerm)}&limit=5&appid=${API_KEY}`
       )
@@ -34,7 +40,19 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
         setError('Location not found. Please try a different search term.')
       }
     } catch (err) {
-      setError('Failed to search location. Please try again.')
+      console.error('Location search error details:', err.response?.data || err.message)
+      
+      // More specific error messages
+      if (err.message.includes('API key is missing')) {
+        setError('API key is missing. Please check your environment variables.')
+      } else if (err.response?.status === 401) {
+        setError('Invalid API key. Please check your OpenWeatherMap API key.')
+      } else if (err.response?.status === 429) {
+        setError('API rate limit exceeded. Please try again later.')
+      } else {
+        setError('Failed to search location. Please try again.')
+      }
+      
       console.error('Location search error:', err)
     } finally {
       setSearching(false)
@@ -59,6 +77,12 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
             
             // Reverse geocoding to get location name
             const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
+            
+            // Check if API key is available
+            if (!API_KEY) {
+              throw new Error('API key is missing. Please check your environment variables.')
+            }
+            
             const response = await axios.get(
               `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`
             )

@@ -1,0 +1,82 @@
+.ad-banner {
+  width: 100%;
+  max-width: 100%;
+  margin: 1rem auto;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.5rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ad-banner.top {
+  margin-bottom: 1rem;
+}
+
+.ad-banner.bottom {
+  margin-top: 1rem;
+}
+
+.ad-banner.sidebar {
+  margin: 1rem 0;
+}
+
+/* Mobile devices (up to 768px) */
+@media (max-width: 768px) {
+  .ad-banner {
+    margin: 0.5rem auto;
+    padding: 0.25rem;
+    border-radius: 8px;
+  }
+  
+  .ad-banner.top {
+    margin-bottom: 0.5rem;
+  }
+  
+  .ad-banner.bottom {
+    margin-top: 0.5rem;
+  }
+}
+
+/* Tablet devices (768px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .ad-banner {
+    margin: 0.75rem auto;
+    padding: 0.375rem;
+  }
+}
+
+/* Desktop devices (1025px and above) */
+@media (min-width: 1025px) {
+  .ad-banner {
+    max-width: 728px; /* Standard banner width */
+  }
+  
+  .ad-banner.sidebar {
+    max-width: 300px; /* Sidebar ad width */
+  }
+}
+
+/* Large desktop devices (1440px and above) */
+@media (min-width: 1440px) {
+  .ad-banner {
+    max-width: 970px; /* Large banner width */
+  }
+}
+
+/* Ensure ads don't break layout */
+.ad-banner ins {
+  display: block !important;
+  margin: 0 auto;
+}
+
+/* Loading state */
+.ad-banner:empty::before {
+  content: "Loading advertisement...";
+  display: block;
+  padding: 2rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+} 

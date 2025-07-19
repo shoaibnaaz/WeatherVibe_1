@@ -8,6 +8,7 @@ import FiveDayForecast from './components/FiveDayForecast'
 import WeatherDetails from './components/WeatherDetails'
 import LocationSearch from './components/LocationSearch'
 import LoadingSpinner from './components/LoadingSpinner'
+import AdBanner from './components/AdBanner'
 import './App.css'
 
 const BASE_URL = 'https://api.openweathermap.org/data/2.5'
@@ -16,6 +17,11 @@ const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
 // Debug: Log API key status (without exposing the actual key)
 console.log('API Key Status:', API_KEY ? 'Present' : 'Missing')
 console.log('API Key Length:', API_KEY ? API_KEY.length : 0)
+
+// Check if API key is available
+if (!API_KEY) {
+  console.error('❌ VITE_OPENWEATHER_API_KEY is missing! Please add it to your environment variables.')
+}
 
 function App() {
   const [weatherData, setWeatherData] = useState(null)
@@ -30,6 +36,11 @@ function App() {
       setLoading(true)
       setError(null)
       
+      // Check if API key is available
+      if (!API_KEY) {
+        throw new Error('API key is missing. Please check your environment variables.')
+      }
+      
       // Debug: Log the API call
       console.log('Making API call with key:', API_KEY ? 'Present' : 'Missing')
       
@@ -42,7 +53,18 @@ function App() {
       setForecastData(forecastRes.data)
     } catch (err) {
       console.error('Weather fetch error details:', err.response?.data || err.message)
-      setError('Failed to fetch weather data. Please try again.')
+      
+      // More specific error messages
+      if (err.message.includes('API key is missing')) {
+        setError('API key is missing. Please check your environment variables.')
+      } else if (err.response?.status === 401) {
+        setError('Invalid API key. Please check your OpenWeatherMap API key.')
+      } else if (err.response?.status === 429) {
+        setError('API rate limit exceeded. Please try again later.')
+      } else {
+        setError('Failed to fetch weather data. Please try again.')
+      }
+      
       console.error('Weather fetch error:', err)
     } finally {
       setLoading(false)
@@ -117,6 +139,9 @@ function App() {
           />
         </header>
 
+        {/* Top Ad Banner */}
+        <AdBanner position="top" />
+
         <main className="main-content">
           <AnimatePresence mode="wait">
             {weatherData && (
@@ -155,6 +180,9 @@ function App() {
             )}
           </AnimatePresence>
         </main>
+
+        {/* Bottom Ad Banner */}
+        <AdBanner position="bottom" />
       </div>
     </div>
   )
