@@ -13,6 +13,10 @@ import './App.css'
 const BASE_URL = 'https://api.openweathermap.org/data/2.5'
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
 
+// Debug: Log API key status (without exposing the actual key)
+console.log('API Key Status:', API_KEY ? 'Present' : 'Missing')
+console.log('API Key Length:', API_KEY ? API_KEY.length : 0)
+
 function App() {
   const [weatherData, setWeatherData] = useState(null)
   const [forecastData, setForecastData] = useState(null)
@@ -26,6 +30,9 @@ function App() {
       setLoading(true)
       setError(null)
       
+      // Debug: Log the API call
+      console.log('Making API call with key:', API_KEY ? 'Present' : 'Missing')
+      
       const [weatherRes, forecastRes] = await Promise.all([
         axios.get(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`),
         axios.get(`${BASE_URL}/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`)
@@ -34,6 +41,7 @@ function App() {
       setWeatherData(weatherRes.data)
       setForecastData(forecastRes.data)
     } catch (err) {
+      console.error('Weather fetch error details:', err.response?.data || err.message)
       setError('Failed to fetch weather data. Please try again.')
       console.error('Weather fetch error:', err)
     } finally {
