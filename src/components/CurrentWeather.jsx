@@ -244,7 +244,6 @@ const CurrentWeather = ({ data, location, units, onUnitsChange }) => {
       'mfe': `Meteo dan ${city} i ${desc} ek ${temp} ${unit} degre.`,
       'naq': `ǃHui ǁgaeb ${city} ǀui ${desc} ǁga ${temp} ${unit}.`,
       'nyn': `Obworo bwa ${city} ni ${desc} na obunyinyi bwa ${temp} ${unit}.`,
-      'om': `Haala qilleensaa ${city} kan ${desc} yoo ta'u kan qilleensaa ${temp} ${unit}.`,
       'saq': `Mbua ya ${city} ni ${desc} na uthithi wa ${temp} ${unit}.`,
       'seh': `Tempo i ${city} ndi ${desc} ndi kutentha kwa ${temp} ${unit}.`,
       'ses': `Xali ${city} ga ${desc} ka xa ${temp} ${unit}.`,
