@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Thermometer, Droplets, Wind, Eye, Sunrise, Sunset } from 'lucide-react'
 import './CurrentWeather.css'
@@ -32,6 +32,7 @@ const CurrentWeather = ({ data, location, units, onUnitsChange }) => {
   const getSpeedUnit = () => units === 'metric' ? 'm/s' : 'mph'
 
   const [voiceLang, setVoiceLang] = useState('en-US'); // default to English
+  const [availableVoices, setAvailableVoices] = useState([]);
 
   // List of supported languages
   const languages = [
@@ -53,42 +54,113 @@ const CurrentWeather = ({ data, location, units, onUnitsChange }) => {
   // Voice feedback handler
   const handleSpeakWeather = () => {
     if (!data) return;
+    
     const temp = Math.round(data.main.temp);
     const desc = data.weather[0].description;
     const city = location.name;
-
-    // You can customize messages for each language if you want
-    let message;
-    if (voiceLang === 'ur-PK') {
-      message = `اس وقت ${city} میں موسم ${desc} ہے اور درجہ حرارت ${temp} ڈگری ہے۔`;
-    } else if (voiceLang === 'ps-PK') {
-      message = `اوس مهال په ${city} کې موسم ${desc} دی او تودوخه ${temp} درجې ده.`;
-    } else if (voiceLang === 'zh-CN') {
-      message = `当前${city}的天气是${desc}，气温${temp}度。`;
-    } else if (voiceLang === 'hi-IN') {
-      message = `इस समय ${city} में मौसम ${desc} है और तापमान ${temp} डिग्री है।`;
-    } else if (voiceLang === 'bn-BD') {
-      message = `এখন ${city} এর আবহাওয়া ${desc} এবং তাপমাত্রা ${temp} ডিগ্রি।`;
-    } else if (voiceLang === 'es-ES') {
-      message = `El clima actual en ${city} es ${desc} con una temperatura de ${temp} grados.`;
-    } else if (voiceLang === 'de-DE') {
-      message = `Das aktuelle Wetter in ${city} ist ${desc} bei einer Temperatur von ${temp} Grad.`;
-    } else if (voiceLang === 'ru-RU') {
-      message = `Сейчас в городе ${city} ${desc}, температура ${temp} градусов.`;
-    } else if (voiceLang === 'tr-TR') {
-      message = `${city} için güncel hava durumu: ${desc}, sıcaklık ${temp} derece.`;
-    } else if (voiceLang === 'ar-SA') {
-      message = `الطقس الحالي في ${city} هو ${desc} ودرجة الحرارة ${temp} درجة.`;
-    } else if (voiceLang === 'fr-FR') {
-      message = `Le temps actuel à ${city} est ${desc} avec une température de ${temp} degrés.`;
-    } else {
-      // Default English
-      message = `The current weather in ${city} is ${desc} with a temperature of ${temp} degrees.`;
+    const unit = getTemperatureUnit();
+    
+    // Check if speech synthesis is supported
+    if (!window.speechSynthesis) {
+      alert('Speech synthesis is not supported in your browser. Please try Chrome, Edge, or Safari.');
+      return;
     }
 
-    const utterance = new window.SpeechSynthesisUtterance(message);
-    utterance.lang = voiceLang;
+    // Get available voices
+    const voices = window.speechSynthesis.getVoices();
+    
+    // Try to find a voice for the selected language
+    let selectedVoice = voices.find(voice => 
+      voice.lang.startsWith(voiceLang.split('-')[0]) || 
+      voice.lang === voiceLang
+    );
+    
+    // If no voice found for selected language, try to find any available voice
+    if (!selectedVoice) {
+      selectedVoice = voices.find(voice => voice.lang.startsWith('en')) || voices[0];
+      if (selectedVoice) {
+        alert(`Voice for ${languages.find(lang => lang.code === voiceLang)?.label} not available. Using ${selectedVoice.name} instead.`);
+      } else {
+        alert('No voices available. Please try a different browser or language.');
+        return;
+      }
+    }
+
+    let message;
+    if (voiceLang === 'ur-PK') {
+      message = `اس وقت ${city} میں موسم ${desc} ہے اور درجہ حرارت ${temp} ${unit} ہے۔`;
+    } else if (voiceLang === 'ps-PK') {
+      message = `اوس مهال په ${city} کې هوا ${desc} ده او تودوخه ${temp} ${unit} ده.`;
+    } else if (voiceLang === 'zh-CN') {
+      message = `${city}的天气是${desc}，温度是${temp}${unit}。`;
+    } else if (voiceLang === 'hi-IN') {
+      message = `${city} में मौसम ${desc} है और तापमान ${temp} ${unit} है।`;
+    } else if (voiceLang === 'bn-BD') {
+      message = `${city} এ আবহাওয়া ${desc} এবং তাপমাত্রা ${temp} ${unit}।`;
+    } else if (voiceLang === 'es-ES') {
+      message = `El clima en ${city} es ${desc} con una temperatura de ${temp} ${unit}.`;
+    } else if (voiceLang === 'de-DE') {
+      message = `Das Wetter in ${city} ist ${desc} mit einer Temperatur von ${temp} ${unit}.`;
+    } else if (voiceLang === 'ru-RU') {
+      message = `Погода в ${city} ${desc} с температурой ${temp} ${unit}.`;
+    } else if (voiceLang === 'tr-TR') {
+      message = `${city} şehrinde hava ${desc} ve sıcaklık ${temp} ${unit}.`;
+    } else if (voiceLang === 'ar-SA') {
+      message = `الطقس في ${city} ${desc} ودرجة الحرارة ${temp} ${unit}.`;
+    } else if (voiceLang === 'fr-FR') {
+      message = `Le temps à ${city} est ${desc} avec une température de ${temp} ${unit}.`;
+    } else {
+      message = `The current weather in ${city} is ${desc} with a temperature of ${temp} ${unit}.`;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.voice = selectedVoice;
+    utterance.rate = 0.9; // Slightly slower for better clarity
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    // Stop any currently speaking
+    window.speechSynthesis.cancel();
+    
+    // Speak the message
     window.speechSynthesis.speak(utterance);
+  };
+
+  // Load voices when component mounts
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      setAvailableVoices(voices);
+      
+      if (voices.length > 0) {
+        // Check if default language voice is available
+        const defaultVoice = voices.find(voice => 
+          voice.lang.startsWith(voiceLang.split('-')[0]) || 
+          voice.lang === voiceLang
+        );
+        if (!defaultVoice) {
+          console.log(`Voice for ${voiceLang} not available. Available voices:`, voices.map(v => `${v.name} (${v.lang})`));
+        }
+      }
+    };
+
+    // Load voices immediately if available
+    loadVoices();
+    
+    // Also load when voices change
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, [voiceLang]);
+
+  // Check if voice is available for selected language
+  const isVoiceAvailable = (langCode) => {
+    return availableVoices.some(voice => 
+      voice.lang.startsWith(langCode.split('-')[0]) || 
+      voice.lang === langCode
+    );
   };
 
   const getWeatherTextColor = () => {
@@ -145,7 +217,9 @@ const CurrentWeather = ({ data, location, units, onUnitsChange }) => {
             style={{ padding: '0.25rem', borderRadius: '0.5rem', fontSize: '1rem' }}
           >
             {languages.map(lang => (
-              <option key={lang.code} value={lang.code}>{lang.label}</option>
+              <option key={lang.code} value={lang.code}>
+                {lang.label} {isVoiceAvailable(lang.code) ? '✅' : '❌'}
+              </option>
             ))}
           </select>
           <button
