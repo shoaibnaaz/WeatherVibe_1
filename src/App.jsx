@@ -27,14 +27,36 @@ if (!API_KEY) {
 function App() {
   const [weatherData, setWeatherData] = useState(null)
   const [forecastData, setForecastData] = useState(null)
-  const [location, setLocation] = useState({ lat: 40.7128, lon: -74.0060, name: 'New York' })
+  const [location, setLocation] = useState({ lat: 33.6844, lon: 73.0479, name: 'Rawalpindi' }) // Default to Rawalpindi
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [units, setUnits] = useState('metric')
   const [isInitialLoad, setIsInitialLoad] = useState(true)
 
+  // Function to get city name from coordinates using reverse geocoding
+  const getCityNameFromCoords = useCallback(async (lat, lon) => {
+    try {
+      const response = await axios.get(
+        `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`
+      )
+      
+      if (response.data && response.data.length > 0) {
+        const cityData = response.data[0]
+        return {
+          name: cityData.name,
+          state: cityData.state,
+          country: cityData.country
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Reverse geocoding error:', error)
+      return null
+    }
+  }, [])
+
   // Memoize API calls to prevent unnecessary requests
-  const fetchWeatherData = useCallback(async (lat, lon) => {
+  const fetchWeatherData = useCallback(async (lat, lon, cityName = null) => {
     try {
       setLoading(true)
       setError(null)
@@ -46,6 +68,7 @@ function App() {
       
       // Debug: Log the API call
       console.log('Making API call with key:', API_KEY ? 'Present' : 'Missing')
+      console.log('Fetching weather for coordinates:', lat, lon)
       
       // Use Promise.allSettled for better error handling
       const [weatherRes, forecastRes] = await Promise.allSettled([
@@ -57,6 +80,25 @@ function App() {
       if (weatherRes.status === 'fulfilled' && forecastRes.status === 'fulfilled') {
         setWeatherData(weatherRes.value.data)
         setForecastData(forecastRes.value.data)
+        
+        // Update location with proper city name if not provided
+        if (!cityName) {
+          const cityInfo = await getCityNameFromCoords(lat, lon)
+          if (cityInfo) {
+            setLocation(prev => ({
+              ...prev,
+              lat,
+              lon,
+              name: cityInfo.name,
+              state: cityInfo.state,
+              country: cityInfo.country
+            }))
+          } else {
+            setLocation(prev => ({ ...prev, lat, lon }))
+          }
+        } else {
+          setLocation(prev => ({ ...prev, lat, lon, name: cityName }))
+        }
       } else {
         throw new Error('Failed to fetch weather data')
       }
@@ -79,17 +121,17 @@ function App() {
       setLoading(false)
       setIsInitialLoad(false)
     }
-  }, [units])
+  }, [units, getCityNameFromCoords])
 
   const handleLocationChange = useCallback((newLocation) => {
     setLocation(newLocation)
-    fetchWeatherData(newLocation.lat, newLocation.lon)
+    fetchWeatherData(newLocation.lat, newLocation.lon, newLocation.name)
   }, [fetchWeatherData])
 
   const handleUnitsChange = useCallback((newUnits) => {
     setUnits(newUnits)
-    fetchWeatherData(location.lat, location.lon)
-  }, [fetchWeatherData, location.lat, location.lon])
+    fetchWeatherData(location.lat, location.lon, location.name)
+  }, [fetchWeatherData, location.lat, location.lon, location.name])
 
   // Memoize the initial location fetch
   useEffect(() => {
@@ -99,20 +141,37 @@ function App() {
         try {
           const position = await new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, {
-              timeout: 10000, // 10 second timeout
-              enableHighAccuracy: false // Use faster, less accurate location
+              timeout: 15000, // 15 second timeout
+              enableHighAccuracy: true, // Use high accuracy for better location
+              maximumAge: 300000 // Cache for 5 minutes
             })
           })
           
           const { latitude, longitude } = position.coords
-          setLocation({ lat: latitude, lon: longitude, name: 'Current Location' })
-          await fetchWeatherData(latitude, longitude)
+          console.log('User location detected:', latitude, longitude)
+          
+          // Get city name from coordinates
+          const cityInfo = await getCityNameFromCoords(latitude, longitude)
+          if (cityInfo) {
+            setLocation({ 
+              lat: latitude, 
+              lon: longitude, 
+              name: cityInfo.name,
+              state: cityInfo.state,
+              country: cityInfo.country
+            })
+            console.log('City detected:', cityInfo)
+          } else {
+            setLocation({ lat: latitude, lon: longitude, name: 'Current Location' })
+          }
+          
+          await fetchWeatherData(latitude, longitude, cityInfo?.name)
         } catch (error) {
-          console.log('Geolocation failed, using default location')
-          await fetchWeatherData(location.lat, location.lon)
+          console.log('Geolocation failed, using default location (Rawalpindi)')
+          await fetchWeatherData(location.lat, location.lon, location.name)
         }
       } else {
-        await fetchWeatherData(location.lat, location.lon)
+        await fetchWeatherData(location.lat, location.lon, location.name)
       }
     }
 
@@ -177,7 +236,7 @@ function App() {
         <div className="error-message">
           <h2>Oops! Something went wrong</h2>
           <p>{error}</p>
-          <button onClick={() => fetchWeatherData(location.lat, location.lon)} aria-label="Retry fetching weather data">
+          <button onClick={() => fetchWeatherData(location.lat, location.lon, location.name)} aria-label="Retry fetching weather data">
             Try Again
           </button>
         </div>
