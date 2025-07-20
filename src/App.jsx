@@ -198,11 +198,17 @@ function App() {
             onUnitsChange={handleUnitsChange}
           />
           
+          {/* Mid-content Ad Banner */}
+          <AdBanner position="middle" format="banner" />
+          
           {/* Weather Summary Cards */}
           <WeatherSummary 
             data={weatherData} 
             units={units}
           />
+          
+          {/* Rectangle Ad between sections */}
+          <AdBanner position="middle" format="rectangle" />
           
           <div className="forecast-section">
             <HourlyForecast 
@@ -215,6 +221,9 @@ function App() {
               units={units}
             />
           </div>
+          
+          {/* Another banner ad before details */}
+          <AdBanner position="middle" format="banner" />
           
           <WeatherDetails 
             data={weatherData} 
@@ -295,7 +304,7 @@ function App() {
         </header>
 
         {/* Top Ad Banner */}
-        <AdBanner position="top" />
+        <AdBanner position="top" format="banner" />
 
         <main className="main-content">
           {loading && !isInitialLoad ? (
@@ -317,6 +326,9 @@ function App() {
               </motion.div>
               
               {quickInfoCards}
+              
+              {/* Ad in placeholder content */}
+              <AdBanner position="middle" format="rectangle" />
               
               <motion.div 
                 className="feature-highlights"
@@ -349,7 +361,10 @@ function App() {
         </main>
 
         {/* Bottom Ad Banner */}
-        <AdBanner position="bottom" />
+        <AdBanner position="bottom" format="banner" />
+        
+        {/* Sidebar Ad for Desktop */}
+        <AdBanner position="sidebar" format="sidebar" />
       </div>
     </div>
   )
