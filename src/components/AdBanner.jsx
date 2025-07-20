@@ -22,32 +22,32 @@ const AdBanner = ({ position = 'top', format = 'banner' }) => {
       case 'banner':
         return {
           className: 'ad-banner',
-          adUnit: 'ca-pub-XXXXXXXXXXXXXXXX',
-          adSlot: position === 'top' ? '1234567890' : '0987654321',
+          adUnit: 'ca-pub-9937458801641854', // Your Publisher ID
+          adSlot: position === 'top' ? '1234567890' : '0987654321', // Create ad units and replace these IDs
           adFormat: 'auto',
           responsive: true
         }
       case 'rectangle':
         return {
           className: 'ad-rectangle',
-          adUnit: 'ca-pub-XXXXXXXXXXXXXXXX',
-          adSlot: position === 'top' ? '1122334455' : '5544332211',
+          adUnit: 'ca-pub-9937458801641854', // Your Publisher ID
+          adSlot: position === 'top' ? '1122334455' : '5544332211', // Create ad units and replace these IDs
           adFormat: 'rectangle',
           responsive: false
         }
       case 'sidebar':
         return {
           className: 'ad-sidebar',
-          adUnit: 'ca-pub-XXXXXXXXXXXXXXXX',
-          adSlot: '6677889900',
+          adUnit: 'ca-pub-9937458801641854', // Your Publisher ID
+          adSlot: '6677889900', // Create ad unit and replace this ID
           adFormat: 'vertical',
           responsive: false
         }
       default:
         return {
           className: 'ad-banner',
-          adUnit: 'ca-pub-XXXXXXXXXXXXXXXX',
-          adSlot: position === 'top' ? '1234567890' : '0987654321',
+          adUnit: 'ca-pub-9937458801641854', // Your Publisher ID
+          adSlot: position === 'top' ? '1234567890' : '0987654321', // Create ad units and replace these IDs
           adFormat: 'auto',
           responsive: true
         }
