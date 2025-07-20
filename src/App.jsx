@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import WeatherBackground from './components/WeatherBackground'
@@ -31,8 +31,10 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [units, setUnits] = useState('metric')
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
 
-  const fetchWeatherData = async (lat, lon) => {
+  // Memoize API calls to prevent unnecessary requests
+  const fetchWeatherData = useCallback(async (lat, lon) => {
     try {
       setLoading(true)
       setError(null)
@@ -45,13 +47,19 @@ function App() {
       // Debug: Log the API call
       console.log('Making API call with key:', API_KEY ? 'Present' : 'Missing')
       
-      const [weatherRes, forecastRes] = await Promise.all([
+      // Use Promise.allSettled for better error handling
+      const [weatherRes, forecastRes] = await Promise.allSettled([
         axios.get(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`),
         axios.get(`${BASE_URL}/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${API_KEY}`)
       ])
       
-      setWeatherData(weatherRes.data)
-      setForecastData(forecastRes.data)
+      // Check if both requests were successful
+      if (weatherRes.status === 'fulfilled' && forecastRes.status === 'fulfilled') {
+        setWeatherData(weatherRes.value.data)
+        setForecastData(forecastRes.value.data)
+      } else {
+        throw new Error('Failed to fetch weather data')
+      }
     } catch (err) {
       console.error('Weather fetch error details:', err.response?.data || err.message)
       
@@ -63,45 +71,103 @@ function App() {
       } else if (err.response?.status === 429) {
         setError('API rate limit exceeded. Please try again later.')
       } else {
-      setError('Failed to fetch weather data. Please try again.')
+        setError('Failed to fetch weather data. Please try again.')
       }
       
       console.error('Weather fetch error:', err)
     } finally {
       setLoading(false)
+      setIsInitialLoad(false)
     }
-  }
+  }, [units])
 
-  const handleLocationChange = (newLocation) => {
+  const handleLocationChange = useCallback((newLocation) => {
     setLocation(newLocation)
     fetchWeatherData(newLocation.lat, newLocation.lon)
-  }
+  }, [fetchWeatherData])
 
-  const handleUnitsChange = (newUnits) => {
+  const handleUnitsChange = useCallback((newUnits) => {
     setUnits(newUnits)
     fetchWeatherData(location.lat, location.lon)
-  }
+  }, [fetchWeatherData, location.lat, location.lon])
 
+  // Memoize the initial location fetch
   useEffect(() => {
-    // Get user's location on first load
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
+    const initializeApp = async () => {
+      // Get user's location on first load
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              timeout: 10000, // 10 second timeout
+              enableHighAccuracy: false // Use faster, less accurate location
+            })
+          })
+          
           const { latitude, longitude } = position.coords
           setLocation({ lat: latitude, lon: longitude, name: 'Current Location' })
-          fetchWeatherData(latitude, longitude)
-        },
-        () => {
-          // Fallback to default location
-          fetchWeatherData(location.lat, location.lon)
+          await fetchWeatherData(latitude, longitude)
+        } catch (error) {
+          console.log('Geolocation failed, using default location')
+          await fetchWeatherData(location.lat, location.lon)
         }
-      )
-    } else {
-      fetchWeatherData(location.lat, location.lon)
+      } else {
+        await fetchWeatherData(location.lat, location.lon)
+      }
     }
-  }, [])
 
-  if (loading) {
+    initializeApp()
+  }, []) // Empty dependency array for initial load only
+
+  // Memoize the main content to prevent unnecessary re-renders
+  const mainContent = useMemo(() => {
+    if (!weatherData) return null
+
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={location.lat + location.lon}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <CurrentWeather 
+            data={weatherData} 
+            location={location}
+            units={units}
+            onUnitsChange={handleUnitsChange}
+          />
+          
+          {/* Weather Summary Cards */}
+          <WeatherSummary 
+            data={weatherData} 
+            units={units}
+          />
+          
+          <div className="forecast-section">
+            <HourlyForecast 
+              data={forecastData} 
+              units={units}
+            />
+            
+            <FiveDayForecast 
+              data={forecastData} 
+              units={units}
+            />
+          </div>
+          
+          <WeatherDetails 
+            data={weatherData} 
+            forecastData={forecastData}
+            units={units}
+          />
+        </motion.div>
+      </AnimatePresence>
+    )
+  }, [weatherData, forecastData, location, units, handleUnitsChange])
+
+  if (isInitialLoad && loading) {
     return <LoadingSpinner />
   }
 
@@ -144,48 +210,13 @@ function App() {
         <AdBanner position="top" />
 
         <main className="main-content">
-          <AnimatePresence mode="wait">
-            {weatherData && (
-              <motion.div
-                key={location.lat + location.lon}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <CurrentWeather 
-                  data={weatherData} 
-                  location={location}
-                  units={units}
-                  onUnitsChange={handleUnitsChange}
-                />
-                
-                {/* Weather Summary Cards */}
-                <WeatherSummary 
-                  data={weatherData} 
-                  units={units}
-                />
-                
-                <div className="forecast-section">
-                  <HourlyForecast 
-                    data={forecastData} 
-                    units={units}
-                  />
-                  
-                  <FiveDayForecast 
-                    data={forecastData} 
-                    units={units}
-                  />
-                </div>
-                
-                <WeatherDetails 
-                  data={weatherData} 
-                  forecastData={forecastData}
-                  units={units}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {loading && !isInitialLoad ? (
+            <div className="loading-overlay">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            mainContent
+          )}
         </main>
 
         {/* Bottom Ad Banner */}

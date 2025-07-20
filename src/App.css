@@ -1,7 +1,20 @@
+/* Loading Overlay */
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  backdrop-filter: blur(10px);
+}
+
+/* Performance optimizations */
 .app {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  will-change: transform;
 }
 
 .app-content {
@@ -10,6 +23,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  contain: layout style paint;
 }
 
 .app-header {
@@ -22,6 +36,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   flex-wrap: wrap;
   gap: 1rem;
+  contain: layout style paint;
 }
 
 .app-title {
@@ -33,6 +48,7 @@
   background-clip: text;
   margin: 0;
   white-space: nowrap;
+  will-change: transform;
 }
 
 .main-content {
@@ -41,6 +57,7 @@
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  contain: layout style paint;
 }
 
 .forecast-section {
@@ -260,5 +277,20 @@
   .app-title,
   .error-message button {
     transition: none;
+  }
+  
+  .loading-overlay {
+    animation: none;
+  }
+}
+
+/* Performance optimizations for animations */
+@media (prefers-reduced-motion: no-preference) {
+  .app-title {
+    will-change: transform;
+  }
+  
+  .loading-overlay {
+    will-change: opacity;
   }
 } 
