@@ -226,6 +226,35 @@ function App() {
     )
   }, [weatherData, forecastData, location, units, handleUnitsChange])
 
+  // Quick info cards for when data is loading
+  const quickInfoCards = useMemo(() => (
+    <div className="quick-info-section">
+      <motion.div 
+        className="quick-info-grid"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="quick-info-card">
+          <h3>🌡️ Temperature</h3>
+          <p>Loading current temperature...</p>
+        </div>
+        <div className="quick-info-card">
+          <h3>💨 Wind</h3>
+          <p>Checking wind conditions...</p>
+        </div>
+        <div className="quick-info-card">
+          <h3>💧 Humidity</h3>
+          <p>Measuring humidity levels...</p>
+        </div>
+        <div className="quick-info-card">
+          <h3>👁️ Visibility</h3>
+          <p>Calculating visibility...</p>
+        </div>
+      </motion.div>
+    </div>
+  ), [])
+
   if (isInitialLoad && loading) {
     return <LoadingSpinner />
   }
@@ -273,8 +302,49 @@ function App() {
             <div className="loading-overlay">
               <LoadingSpinner />
             </div>
-          ) : (
+          ) : weatherData ? (
             mainContent
+          ) : (
+            <div className="content-placeholder">
+              <motion.div 
+                className="weather-status-banner"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <h2>🌤️ Weather Information</h2>
+                <p>Getting the latest weather data for {location.name}...</p>
+              </motion.div>
+              
+              {quickInfoCards}
+              
+              <motion.div 
+                className="feature-highlights"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <h3>✨ App Features</h3>
+                <div className="features-grid">
+                  <div className="feature-item">
+                    <span>🌡️</span>
+                    <p>Real-time temperature</p>
+                  </div>
+                  <div className="feature-item">
+                    <span>📱</span>
+                    <p>Mobile responsive</p>
+                  </div>
+                  <div className="feature-item">
+                    <span>🎵</span>
+                    <p>Music recommendations</p>
+                  </div>
+                  <div className="feature-item">
+                    <span>🚗</span>
+                    <p>Travel advice</p>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
           )}
         </main>
 
