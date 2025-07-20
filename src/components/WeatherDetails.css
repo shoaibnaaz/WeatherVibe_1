@@ -1,5 +1,5 @@
 .weather-details {
-  margin-top: 2rem;
+  margin: 2rem 0;
 }
 
 .details-grid {
@@ -44,74 +44,95 @@
 }
 
 /* UV Index Card */
-.uv-content {
-  text-align: center;
+.uv-content, .aqi-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.uv-index {
-  font-size: 3rem;
+.uv-index, .aqi-index {
+  font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  line-height: 1;
 }
 
-.uv-level {
-  font-size: 1.1rem;
+.uv-level, .aqi-level {
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.uv-advice {
+.uv-advice, .aqi-description {
   font-size: 0.875rem;
   color: var(--gray-300);
+  margin: 0;
   line-height: 1.4;
 }
 
-/* Air Quality Card */
-.aqi-content {
-  text-align: center;
+/* Visibility Card */
+.visibility-content, .pressure-content, .precipitation-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.aqi-index {
-  font-size: 3rem;
+.visibility-value, .pressure-value, .precipitation-value {
+  font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  color: var(--white);
+  line-height: 1;
 }
 
-.aqi-level {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.aqi-description {
+.visibility-description, .pressure-description, .precipitation-description {
   font-size: 0.875rem;
   color: var(--gray-300);
+  margin: 0;
   line-height: 1.4;
 }
 
-/* Activity Suggestions Card */
+/* Wind Direction Card */
+.wind-direction-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wind-direction-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.wind-direction-arrow {
+  font-size: 2.5rem;
+  color: var(--sunny-primary);
+  transition: transform 0.3s ease;
+}
+
+.wind-direction-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-300);
+  text-align: center;
+}
+
+/* Activity Card */
 .activity-content {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .activity-item {
   font-size: 0.875rem;
   color: var(--white);
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: var(--transition-fast);
+  line-height: 1.4;
+  padding: 0.25rem 0;
 }
 
-.activity-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(4px);
-}
-
-/* Music Recommendations Card */
+/* Music Card */
 .music-content {
   display: flex;
   flex-direction: column;
@@ -119,48 +140,94 @@
 }
 
 .music-item {
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: var(--transition-fast);
-}
-
-.music-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(4px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .music-genre {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--sunny-primary);
-  margin-bottom: 0.25rem;
 }
 
 .music-mood {
   font-size: 0.875rem;
   color: var(--white);
-  margin-bottom: 0.25rem;
+  font-style: italic;
 }
 
 .music-example {
   font-size: 0.75rem;
-  color: var(--gray-400);
-  font-style: italic;
+  color: var(--gray-300);
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
+/* Large Desktop (1440px and above) */
+@media (min-width: 1440px) {
   .details-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+  
+  .detail-card {
+    padding: 2rem;
+    border-radius: 2rem;
+  }
+  
+  .card-header h3 {
+    font-size: 1.25rem;
+  }
+  
+  .uv-index, .aqi-index, .visibility-value, .pressure-value, .precipitation-value {
+    font-size: 3rem;
+  }
+  
+  .wind-direction-value {
+    font-size: 2.5rem;
+  }
+  
+  .wind-direction-arrow {
+    font-size: 3rem;
   }
 }
 
-@media (max-width: 768px) {
+/* Desktop (1025px to 1439px) */
+@media (min-width: 1025px) and (max-width: 1439px) {
+  .details-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Tablet (768px to 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  
+  .detail-card {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+  
+  .uv-index, .aqi-index, .visibility-value, .pressure-value, .precipitation-value {
+    font-size: 2rem;
+  }
+  
+  .wind-direction-value {
+    font-size: 1.75rem;
+  }
+  
+  .wind-direction-arrow {
+    font-size: 2rem;
+  }
+}
+
+/* Mobile Large (481px to 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
   .weather-details {
-    margin-top: 1.5rem;
+    margin: 1.5rem 0;
   }
   
   .details-grid {
@@ -170,28 +237,7 @@
   
   .detail-card {
     padding: 1rem;
-  }
-  
-  .uv-index, .aqi-index {
-    font-size: 2.5rem;
-  }
-  
-  .uv-level, .aqi-level {
-    font-size: 1rem;
-  }
-  
-  .activity-item, .music-item {
-    padding: 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .weather-details {
-    margin-top: 1rem;
-  }
-  
-  .detail-card {
-    padding: 0.75rem;
+    border-radius: 1rem;
   }
   
   .card-header {
@@ -202,32 +248,96 @@
     font-size: 1rem;
   }
   
-  .uv-index, .aqi-index {
-    font-size: 2rem;
+  .uv-index, .aqi-index, .visibility-value, .pressure-value, .precipitation-value {
+    font-size: 1.75rem;
+  }
+  
+  .wind-direction-value {
+    font-size: 1.5rem;
+  }
+  
+  .wind-direction-arrow {
+    font-size: 1.75rem;
+  }
+  
+  .activity-item {
+    font-size: 0.8rem;
+  }
+  
+  .music-genre {
+    font-size: 1rem;
+  }
+}
+
+/* Mobile Small (up to 480px) */
+@media (max-width: 480px) {
+  .weather-details {
+    margin: 1rem 0;
+  }
+  
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .detail-card {
+    padding: 0.875rem;
+    border-radius: 0.875rem;
+  }
+  
+  .card-header {
+    margin-bottom: 0.5rem;
+  }
+  
+  .card-header h3 {
+    font-size: 0.9rem;
+  }
+  
+  .uv-index, .aqi-index, .visibility-value, .pressure-value, .precipitation-value {
+    font-size: 1.5rem;
   }
   
   .uv-level, .aqi-level {
     font-size: 0.875rem;
   }
   
-  .uv-advice, .aqi-description {
+  .uv-advice, .aqi-description, .visibility-description, .pressure-description, .precipitation-description {
     font-size: 0.75rem;
+  }
+  
+  .wind-direction-value {
+    font-size: 1.25rem;
+  }
+  
+  .wind-direction-arrow {
+    font-size: 1.5rem;
+  }
+  
+  .wind-direction-text {
+    font-size: 0.875rem;
   }
   
   .activity-item {
     font-size: 0.75rem;
-    padding: 0.5rem;
   }
   
   .music-genre {
-    font-size: 0.875rem;
+    font-size: 0.9rem;
   }
   
   .music-mood {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
   }
   
   .music-example {
-    font-size: 0.625rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 } 

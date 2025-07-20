@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Activity, Music, Sun, Wind, Droplets, Thermometer } from 'lucide-react'
+import { Activity, Music, Sun, Wind, Droplets, Thermometer, Eye, Compass, CloudRain, Sunrise, Sunset } from 'lucide-react'
 import './WeatherDetails.css'
 
 const WeatherDetails = ({ data, forecastData, units }) => {
@@ -100,6 +100,20 @@ const WeatherDetails = ({ data, forecastData, units }) => {
     return recommendations
   }
 
+  const getVisibilityDescription = (visibility) => {
+    if (visibility >= 10000) return 'Excellent visibility'
+    if (visibility >= 5000) return 'Good visibility'
+    if (visibility >= 2000) return 'Moderate visibility'
+    if (visibility >= 1000) return 'Poor visibility'
+    return 'Very poor visibility'
+  }
+
+  const getPressureDescription = (pressure) => {
+    if (pressure > 1020) return 'High pressure - generally fair weather'
+    if (pressure > 1010) return 'Normal pressure - stable conditions'
+    return 'Low pressure - unsettled weather possible'
+  }
+
   const uvIndex = getUVIndex(data.main.temp, data.main.humidity, data.weather[0].main.toLowerCase())
   const uvLevel = getUVLevel(uvIndex)
   const aqi = getAirQuality(data.main.temp, data.main.humidity, data.wind.speed)
@@ -163,12 +177,105 @@ const WeatherDetails = ({ data, forecastData, units }) => {
           </div>
         </motion.div>
 
+        {/* Visibility */}
+        <motion.div 
+          className="detail-card visibility-card"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <div className="card-header">
+            <Eye className="card-icon" />
+            <h3>Visibility</h3>
+          </div>
+          <div className="visibility-content">
+            <div className="visibility-value">
+              {data.visibility ? `${(data.visibility / 1000).toFixed(1)} km` : 'N/A'}
+            </div>
+            <div className="visibility-description">
+              {data.visibility ? getVisibilityDescription(data.visibility) : 'Data unavailable'}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Atmospheric Pressure */}
+        <motion.div 
+          className="detail-card pressure-card"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+        >
+          <div className="card-header">
+            <Thermometer className="card-icon" />
+            <h3>Pressure</h3>
+          </div>
+          <div className="pressure-content">
+            <div className="pressure-value">
+              {data.main.pressure} hPa
+            </div>
+            <div className="pressure-description">
+              {getPressureDescription(data.main.pressure)}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Wind Direction */}
+        <motion.div 
+          className="detail-card wind-direction-card"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+        >
+          <div className="card-header">
+            <Compass className="card-icon" />
+            <h3>Wind Direction</h3>
+          </div>
+          <div className="wind-direction-content">
+            <div className="wind-direction-value">
+              {data.wind.deg}°
+            </div>
+            <div className="wind-direction-arrow" style={{ transform: `rotate(${data.wind.deg}deg)` }}>
+              ↑
+            </div>
+            <div className="wind-direction-text">
+              {data.wind.deg >= 337.5 || data.wind.deg < 22.5 ? 'North' :
+               data.wind.deg >= 22.5 && data.wind.deg < 67.5 ? 'Northeast' :
+               data.wind.deg >= 67.5 && data.wind.deg < 112.5 ? 'East' :
+               data.wind.deg >= 112.5 && data.wind.deg < 157.5 ? 'Southeast' :
+               data.wind.deg >= 157.5 && data.wind.deg < 202.5 ? 'South' :
+               data.wind.deg >= 202.5 && data.wind.deg < 247.5 ? 'Southwest' :
+               data.wind.deg >= 247.5 && data.wind.deg < 292.5 ? 'West' : 'Northwest'}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Precipitation Probability */}
+        <motion.div 
+          className="detail-card precipitation-card"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.6 }}
+        >
+          <div className="card-header">
+            <CloudRain className="card-icon" />
+            <h3>Precipitation</h3>
+          </div>
+          <div className="precipitation-content">
+            <div className="precipitation-value">
+              {data.rain ? `${data.rain['1h'] || data.rain['3h'] || 0} mm` : '0 mm'}
+            </div>
+            <div className="precipitation-description">
+              {data.rain && (data.rain['1h'] || data.rain['3h']) ? 'Rain in the last hour' : 'No recent precipitation'}
+            </div>
+          </div>
+        </motion.div>
+
         {/* Activity Suggestions */}
         <motion.div 
           className="detail-card activity-card"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
+          transition={{ duration: 0.4, delay: 0.7 }}
         >
           <div className="card-header">
             <Activity className="card-icon" />
@@ -188,7 +295,7 @@ const WeatherDetails = ({ data, forecastData, units }) => {
           className="detail-card music-card"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
+          transition={{ duration: 0.4, delay: 0.8 }}
         >
           <div className="card-header">
             <Music className="card-icon" />
