@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Clock } from 'lucide-react'
+import { Clock, Droplets, Wind, Thermometer } from 'lucide-react'
 import './HourlyForecast.css'
 
 const HourlyForecast = ({ data, units }) => {
@@ -31,6 +31,21 @@ const HourlyForecast = ({ data, units }) => {
   // Get next 24 hours of forecast (every 3 hours)
   const hourlyData = data?.list?.slice(0, 8) || []
 
+  const getWeatherDescription = (weatherCode) => {
+    const descriptions = {
+      '01d': 'Clear Sky', '01n': 'Clear Night',
+      '02d': 'Partly Cloudy', '02n': 'Partly Cloudy',
+      '03d': 'Cloudy', '03n': 'Cloudy',
+      '04d': 'Overcast', '04n': 'Overcast',
+      '09d': 'Light Rain', '09n': 'Light Rain',
+      '10d': 'Rain', '10n': 'Rain',
+      '11d': 'Thunderstorm', '11n': 'Thunderstorm',
+      '13d': 'Snow', '13n': 'Snow',
+      '50d': 'Mist', '50n': 'Mist'
+    }
+    return descriptions[weatherCode] || 'Unknown'
+  }
+
   return (
     <motion.div 
       className="hourly-forecast"
@@ -43,33 +58,62 @@ const HourlyForecast = ({ data, units }) => {
         <h3 className="forecast-title">24-Hour Forecast</h3>
       </div>
 
-      <div className="hourly-timeline">
+      <div className="hourly-list">
         {hourlyData.map((hour, index) => (
           <motion.div
             key={hour.dt}
-            className="hourly-item"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            className="hourly-row"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: index * 0.1 }}
           >
-            <div className="hour-time">
-              {index === 0 ? 'Now' : formatTime(hour.dt)}
-            </div>
-            
-            <div className="hour-icon">
-              {getWeatherIcon(hour.weather[0].icon)}
-            </div>
-            
-            <div className="hour-temp">
-              {Math.round(hour.main.temp)}{getTemperatureUnit()}
-            </div>
-            
-            <div className="hour-details">
-              <div className="hour-humidity">
-                💧 {hour.main.humidity}%
+            <div className="hour-time-section">
+              <div className="hour-time">
+                {index === 0 ? 'Now' : formatTime(hour.dt)}
               </div>
-              <div className="hour-wind">
-                💨 {Math.round(hour.wind.speed)} {units === 'metric' ? 'm/s' : 'mph'}
+              <div className="hour-date">
+                {new Date(hour.dt * 1000).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </div>
+            </div>
+            
+            <div className="hour-weather-section">
+              <div className="hour-icon">
+                {getWeatherIcon(hour.weather[0].icon)}
+              </div>
+              <div className="hour-description">
+                {getWeatherDescription(hour.weather[0].icon)}
+              </div>
+            </div>
+            
+            <div className="hour-temp-section">
+              <div className="hour-temp">
+                {Math.round(hour.main.temp)}{getTemperatureUnit()}
+              </div>
+              <div className="hour-feels-like">
+                Feels like {Math.round(hour.main.feels_like)}{getTemperatureUnit()}
+              </div>
+            </div>
+            
+            <div className="hour-details-section">
+              <div className="detail-item">
+                <Droplets className="detail-icon" />
+                <span className="detail-label">Humidity</span>
+                <span className="detail-value">{hour.main.humidity}%</span>
+              </div>
+              <div className="detail-item">
+                <Wind className="detail-icon" />
+                <span className="detail-label">Wind</span>
+                <span className="detail-value">
+                  {Math.round(hour.wind.speed)} {units === 'metric' ? 'm/s' : 'mph'}
+                </span>
+              </div>
+              <div className="detail-item">
+                <Thermometer className="detail-icon" />
+                <span className="detail-label">Pressure</span>
+                <span className="detail-value">{hour.main.pressure} hPa</span>
               </div>
             </div>
           </motion.div>
@@ -77,23 +121,28 @@ const HourlyForecast = ({ data, units }) => {
       </div>
 
       <div className="forecast-summary">
-        <div className="summary-item">
-          <span className="summary-label">High</span>
-          <span className="summary-value">
-            {Math.round(Math.max(...hourlyData.map(h => h.main.temp)))}{getTemperatureUnit()}
-          </span>
+        <div className="summary-header">
+          <h4>Temperature Summary</h4>
         </div>
-        <div className="summary-item">
-          <span className="summary-label">Low</span>
-          <span className="summary-value">
-            {Math.round(Math.min(...hourlyData.map(h => h.main.temp)))}{getTemperatureUnit()}
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Avg</span>
-          <span className="summary-value">
-            {Math.round(hourlyData.reduce((sum, h) => sum + h.main.temp, 0) / hourlyData.length)}{getTemperatureUnit()}
-          </span>
+        <div className="summary-grid">
+          <div className="summary-item high">
+            <span className="summary-label">High</span>
+            <span className="summary-value">
+              {Math.round(Math.max(...hourlyData.map(h => h.main.temp)))}{getTemperatureUnit()}
+            </span>
+          </div>
+          <div className="summary-item low">
+            <span className="summary-label">Low</span>
+            <span className="summary-value">
+              {Math.round(Math.min(...hourlyData.map(h => h.main.temp)))}{getTemperatureUnit()}
+            </span>
+          </div>
+          <div className="summary-item avg">
+            <span className="summary-label">Average</span>
+            <span className="summary-value">
+              {Math.round(hourlyData.reduce((sum, h) => sum + h.main.temp, 0) / hourlyData.length)}{getTemperatureUnit()}
+            </span>
+          </div>
         </div>
       </div>
     </motion.div>

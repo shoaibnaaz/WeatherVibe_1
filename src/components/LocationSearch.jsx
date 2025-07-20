@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, MapPin } from 'lucide-react'
+import { Search, MapPin, Navigation } from 'lucide-react'
 import axios from 'axios'
 import './LocationSearch.css'
 
@@ -8,12 +8,15 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [suggestions, setSuggestions] = useState([])
 
   const searchLocation = async () => {
     if (!searchTerm.trim()) return
 
     setSearching(true)
     setError('')
+    setShowSuggestions(false)
 
     try {
       // Using OpenWeatherMap Geocoding API
@@ -36,6 +39,7 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
           name: location.name + (location.state ? `, ${location.state}` : '') + (location.country ? `, ${location.country}` : '')
         })
         setSearchTerm('')
+        setSuggestions([])
       } else {
         setError('Location not found. Please try a different search term.')
       }
@@ -50,13 +54,53 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
       } else if (err.response?.status === 429) {
         setError('API rate limit exceeded. Please try again later.')
       } else {
-      setError('Failed to search location. Please try again.')
+        setError('Failed to search location. Please try again.')
       }
       
       console.error('Location search error:', err)
     } finally {
       setSearching(false)
     }
+  }
+
+  const handleSearchInput = async (value) => {
+    setSearchTerm(value)
+    
+    if (value.trim().length > 2) {
+      try {
+        const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
+        if (!API_KEY) return
+        
+        const response = await axios.get(
+          `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(value)}&limit=3&appid=${API_KEY}`
+        )
+        
+        if (response.data && response.data.length > 0) {
+          setSuggestions(response.data)
+          setShowSuggestions(true)
+        } else {
+          setSuggestions([])
+          setShowSuggestions(false)
+        }
+      } catch (err) {
+        setSuggestions([])
+        setShowSuggestions(false)
+      }
+    } else {
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
+  }
+
+  const handleSuggestionClick = (suggestion) => {
+    onLocationChange({
+      lat: suggestion.lat,
+      lon: suggestion.lon,
+      name: suggestion.name + (suggestion.state ? `, ${suggestion.state}` : '') + (suggestion.country ? `, ${suggestion.country}` : '')
+    })
+    setSearchTerm('')
+    setSuggestions([])
+    setShowSuggestions(false)
   }
 
   const handleKeyPress = (e) => {
@@ -69,6 +113,7 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
     if (navigator.geolocation) {
       setSearching(true)
       setError('')
+      setShowSuggestions(false)
       
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -127,13 +172,17 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
     >
       <div className="search-container">
         <div className="search-input-group">
-          <Search className="search-icon" />
+          <div className="search-icon-wrapper">
+            <Search className="search-icon" />
+          </div>
           <input
             type="text"
-            placeholder="Search for a city..."
+            placeholder="Search for a city, country, or location..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchInput(e.target.value)}
             onKeyPress={handleKeyPress}
+            onFocus={() => setShowSuggestions(suggestions.length > 0)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             className="search-input"
             disabled={searching}
             aria-label="Search for a city"
@@ -144,7 +193,15 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
             disabled={searching || !searchTerm.trim()}
             aria-label="Search for city"
           >
-            {searching ? 'Searching...' : 'Search'}
+            {searching ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="loading-spinner"
+              />
+            ) : (
+              'Search'
+            )}
           </button>
         </div>
         
@@ -154,10 +211,36 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
           disabled={searching}
           aria-label="Use current location"
         >
-          <MapPin className="location-icon" />
-          Current Location
+          <Navigation className="location-icon" />
+          <span>Current Location</span>
         </button>
       </div>
+
+      {/* Search Suggestions */}
+      {showSuggestions && suggestions.length > 0 && (
+        <motion.div 
+          className="search-suggestions"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          {suggestions.map((suggestion, index) => (
+            <button
+              key={index}
+              className="suggestion-item"
+              onClick={() => handleSuggestionClick(suggestion)}
+            >
+              <MapPin className="suggestion-icon" />
+              <div className="suggestion-text">
+                <span className="suggestion-name">{suggestion.name}</span>
+                <span className="suggestion-details">
+                  {suggestion.state && `${suggestion.state}, `}{suggestion.country}
+                </span>
+              </div>
+            </button>
+          ))}
+        </motion.div>
+      )}
 
       {error && (
         <motion.div 
@@ -166,6 +249,7 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
         >
+          <span className="error-icon">⚠️</span>
           {error}
         </motion.div>
       )}
