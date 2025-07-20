@@ -50,7 +50,7 @@ const LocationSearch = ({ onLocationChange, currentLocation }) => {
       } else if (err.response?.status === 429) {
         setError('API rate limit exceeded. Please try again later.')
       } else {
-        setError('Failed to search location. Please try again.')
+      setError('Failed to search location. Please try again.')
       }
       
       console.error('Location search error:', err)

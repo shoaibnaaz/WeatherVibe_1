@@ -6,6 +6,7 @@ import CurrentWeather from './components/CurrentWeather'
 import HourlyForecast from './components/HourlyForecast'
 import FiveDayForecast from './components/FiveDayForecast'
 import WeatherDetails from './components/WeatherDetails'
+import WeatherSummary from './components/WeatherSummary'
 import LocationSearch from './components/LocationSearch'
 import LoadingSpinner from './components/LoadingSpinner'
 import AdBanner from './components/AdBanner'
@@ -62,7 +63,7 @@ function App() {
       } else if (err.response?.status === 429) {
         setError('API rate limit exceeded. Please try again later.')
       } else {
-        setError('Failed to fetch weather data. Please try again.')
+      setError('Failed to fetch weather data. Please try again.')
       }
       
       console.error('Weather fetch error:', err)
@@ -157,6 +158,12 @@ function App() {
                   location={location}
                   units={units}
                   onUnitsChange={handleUnitsChange}
+                />
+                
+                {/* Weather Summary Cards */}
+                <WeatherSummary 
+                  data={weatherData} 
+                  units={units}
                 />
                 
                 <div className="forecast-section">

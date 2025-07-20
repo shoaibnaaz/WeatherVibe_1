@@ -1,0 +1,269 @@
+.weather-summary {
+  margin: 2rem 0;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition-fast);
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.card-icon {
+  font-size: 1.5rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--white);
+  margin: 0;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* UV Index Card */
+.uv-value, .aq-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.uv-level, .aq-level {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.uv-advice, .aq-description {
+  font-size: 0.875rem;
+  color: var(--gray-300);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Activity Suggestions Card */
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--white);
+  line-height: 1.4;
+}
+
+.activity-icon {
+  font-size: 0.75rem;
+  color: var(--sunny-primary);
+  flex-shrink: 0;
+}
+
+/* Music Vibes Card */
+.music-genre {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--sunny-primary);
+  margin-bottom: 0.25rem;
+}
+
+.music-mood {
+  font-size: 0.875rem;
+  color: var(--white);
+  margin: 0 0 0.5rem 0;
+  font-style: italic;
+}
+
+.music-artists {
+  font-size: 0.75rem;
+  color: var(--gray-300);
+  margin: 0;
+}
+
+/* Large Desktop (1440px and above) */
+@media (min-width: 1440px) {
+  .summary-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+  
+  .summary-card {
+    padding: 2rem;
+    border-radius: 2rem;
+  }
+  
+  .card-header h3 {
+    font-size: 1.25rem;
+  }
+  
+  .uv-value, .aq-value {
+    font-size: 3rem;
+  }
+  
+  .music-genre {
+    font-size: 1.5rem;
+  }
+}
+
+/* Desktop (1025px to 1439px) */
+@media (min-width: 1025px) and (max-width: 1439px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Tablet (768px to 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  
+  .summary-card {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+  
+  .uv-value, .aq-value {
+    font-size: 2rem;
+  }
+}
+
+/* Mobile Large (481px to 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+  .weather-summary {
+    margin: 1.5rem 0;
+  }
+  
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .summary-card {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+  
+  .card-header {
+    margin-bottom: 0.75rem;
+  }
+  
+  .card-header h3 {
+    font-size: 1rem;
+  }
+  
+  .uv-value, .aq-value {
+    font-size: 1.75rem;
+  }
+  
+  .activity-item {
+    font-size: 0.8rem;
+  }
+  
+  .music-genre {
+    font-size: 1.1rem;
+  }
+}
+
+/* Mobile Small (up to 480px) */
+@media (max-width: 480px) {
+  .weather-summary {
+    margin: 1rem 0;
+  }
+  
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .summary-card {
+    padding: 0.875rem;
+    border-radius: 0.875rem;
+  }
+  
+  .card-header {
+    margin-bottom: 0.5rem;
+  }
+  
+  .card-header h3 {
+    font-size: 0.9rem;
+  }
+  
+  .uv-value, .aq-value {
+    font-size: 1.5rem;
+  }
+  
+  .uv-level, .aq-level {
+    font-size: 0.875rem;
+  }
+  
+  .uv-advice, .aq-description {
+    font-size: 0.75rem;
+  }
+  
+  .activity-item {
+    font-size: 0.75rem;
+  }
+  
+  .music-genre {
+    font-size: 1rem;
+  }
+  
+  .music-mood {
+    font-size: 0.8rem;
+  }
+  
+  .music-artists {
+    font-size: 0.7rem;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+} 
